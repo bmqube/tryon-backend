@@ -1,0 +1,39 @@
+services:
+  tryon:
+    container_name: tryon-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    volumes:
+      - .:/code
+    ports:
+      - target: 8000
+        published: 8000
+    depends_on:
+      - postgres
+    environment:
+      DB_URL: postgresql://tryon:${POSTGRES_PASSWORD:-dilemma}@postgres:5432/tryon
+      JWT_SECRET: ${JWT_SECRET:-secret}
+    networks:
+      - tryon-network
+
+  postgres:
+    container_name: tryon-postgres
+    restart: unless-stopped
+    image: postgres
+    ports:
+      - target: 5432
+        published: 6543
+    environment:
+      POSTGRES_DB: tryon
+      POSTGRES_USER: tryon
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dilemma}
+    volumes:
+      - ./_DATA/pgdata:/var/lib/postgresql/data
+    networks:
+      - tryon-network
+
+networks:
+  tryon-network:
+    driver: bridge

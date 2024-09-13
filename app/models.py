@@ -1,14 +1,8 @@
 from sqlalchemy import Column, Integer, String,Text, Boolean, DateTime, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-import enum
-
 
 from db import Base
-
-class UserRole(enum.Enum):
-    USER = "user"
-    ADMIN = "admin"
 
 class User(Base):
     __tablename__ = 'users'
@@ -18,6 +12,6 @@ class User(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     credit = Column(Integer, nullable=False, default=0)
-    role = Column(UserRole, nullable=False, default=UserRole.USER)
+    role = Column(String, nullable=False, default="user")
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
-from pydantic import BaseModel
-from models import User
-import hashlib, uuid
-from db import get_db
-from sqlalchemy.orm import Session
 import bcrypt
 from auth.jwt_handler import signJWT
+from db import get_db
+from fastapi import APIRouter, Depends, HTTPException, Response
+from models import User
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 router = APIRouter(
     prefix="/auth",

@@ -1,9 +1,8 @@
-from fastapi import FastAPI, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from db import engine, get_db, SessionLocal
 import models
-from routers import auth
+from db import engine
+from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers import auth, generate
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -18,6 +17,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+app.include_router(generate.router)
 
 @app.get("/")
 async def root():

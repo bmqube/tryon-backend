@@ -9,7 +9,7 @@ services:
       - .:/code
     ports:
       - target: 8000
-        published: 8000
+        published: 9000
     depends_on:
       - postgres
     environment:

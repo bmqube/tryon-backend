@@ -40,3 +40,4 @@ watchfiles==0.22.0
 websockets==12.0
 bcrypt
 google-generativeai==0.5.4
+python-multipart

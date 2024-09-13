@@ -1,11 +1,10 @@
 from typing import Annotated, Union
 
-from fastapi import Header, HTTPException, Depends
-from db import get_db
-from sqlalchemy.orm import Session
-
 from auth.jwt_handler import decodeJWT
+from db import get_db
+from fastapi import Depends, Header, HTTPException
 from models import User
+from sqlalchemy.orm import Session
 
 
 async def get_token_header(Authorization: Annotated[Union[str, None], Header()], db: Session = Depends(get_db)):

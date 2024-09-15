@@ -3,6 +3,8 @@ from db import engine
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, generate
+from fastapi.staticfiles import StaticFiles
+import os
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -15,6 +17,10 @@ app.add_middleware(
     allow_methods=["*"],  # Adjust this to your needs (e.g., ["GET", "POST"])
     allow_headers=["*"],  # Adjust this to your needs (e.g., ["Content-Type", "Authorization"])
 )
+
+# Mount the static files directory
+app.mount("/images", StaticFiles(directory="files"), name="files")
+
 
 app.include_router(auth.router)
 app.include_router(generate.router)

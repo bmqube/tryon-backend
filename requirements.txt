@@ -41,3 +41,6 @@ websockets==12.0
 bcrypt
 google-generativeai==0.5.4
 python-multipart
+python-magic
+pillow
+aiofiles

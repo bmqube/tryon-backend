@@ -21,7 +21,7 @@ class GeneratedImage(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    model_image = Column(JSONB, nullable=False)
+    person_image = Column(JSONB, nullable=False)
     cloth_image = Column(JSONB, nullable=False)
     generated_image = Column(JSONB, nullable=False)
     position = Column(Text, nullable=False)

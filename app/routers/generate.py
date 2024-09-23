@@ -9,6 +9,8 @@ import uuid
 import magic
 from PIL import Image
 from typing import Annotated
+import httpx
+from io import BytesIO
 
 directory = "files"
 if not os.path.exists(directory):
@@ -97,19 +99,46 @@ async def save_image(file: UploadFile):
         'thumbnail': thumbnail_filename
     }
 
+async def fetch_data(person_image: UploadFile, cloth_image: UploadFile, position: str) -> UploadFile:
+    url = "http://192.168.68.126:8300/tryon"  # Replace with the actual API URL
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=30) as client:
+            files = {
+                'person_image': (person_image.filename, person_image.file, person_image.content_type),
+                'cloth_image': (cloth_image.filename, cloth_image.file, cloth_image.content_type)
+            }
+            data = {'cloth_type': position}
+
+            response = await client.post(url, files=files, data=data)
+            response.raise_for_status()
+
+            file_content = response.content
+            file_name = "generated_image.jpg"
+
+            upload_file = UploadFile(filename=file_name, file=BytesIO(file_content))
+            return upload_file
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=exc.response.status_code, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
 @router.post("/")
-async def generateImage(model_image: UploadFile, cloth_image: UploadFile, position: Annotated[str, Form()], response: Response, db: Session = Depends(get_db), current_user: UserSchema = Depends(get_token_header)):
+async def generateImage(person_image: UploadFile, cloth_image: UploadFile, position: Annotated[str, Form()], response: Response, db: Session = Depends(get_db), current_user: UserSchema = Depends(get_token_header)):
     try:
 
-        model_image_data = await save_image(model_image)
+        person_image_data = await save_image(person_image)
         cloth_image_data = await save_image(cloth_image)
 
+
+        data = await fetch_data(person_image, cloth_image, position)
+        generated_image_data = await save_image(data)
+        
         generated_image = GeneratedImage(
             user_id=current_user.id,
-            model_image=model_image_data,
+            person_image=person_image_data,
             cloth_image=cloth_image_data,
             position=position,
-            generated_image=model_image_data
+            generated_image=generated_image_data
         )
         
         db.add(generated_image)

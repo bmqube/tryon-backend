@@ -100,7 +100,7 @@ async def save_image(file: UploadFile):
     }
 
 async def fetch_data(person_image: UploadFile, cloth_image: UploadFile, position: str) -> UploadFile:
-    url = "http://192.168.68.126:8300/tryon"  # Replace with the actual API URL
+    url = "http://localhost:8300/tryon"  # Replace with the actual API URL
     try:
         async with httpx.AsyncClient(follow_redirects=True, timeout=30) as client:
             files = {

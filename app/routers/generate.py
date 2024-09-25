@@ -100,7 +100,7 @@ async def save_image(file: UploadFile):
     }
 
 async def fetch_data(person_image: UploadFile, cloth_image: UploadFile, position: str) -> UploadFile:
-    url = "http://localhost:8300/tryon"  # Replace with the actual API URL
+    url = "https://galilei.fringecore.sh/tryon"  # Replace with the actual API URL
     try:
         async with httpx.AsyncClient(follow_redirects=True, timeout=30) as client:
             files = {
@@ -118,6 +118,7 @@ async def fetch_data(person_image: UploadFile, cloth_image: UploadFile, position
             upload_file = UploadFile(filename=file_name, file=BytesIO(file_content))
             return upload_file
     except httpx.HTTPStatusError as exc:
+        print("HEDA")
         raise HTTPException(status_code=exc.response.status_code, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))

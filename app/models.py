@@ -11,7 +11,7 @@ class User(Base):
     fullname = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    credit = Column(Integer, nullable=False, default=0)
+    credit = Column(Integer, nullable=False, default=5)
     role = Column(String, nullable=False, default="user")
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

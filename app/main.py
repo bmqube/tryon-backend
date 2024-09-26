@@ -2,7 +2,7 @@ import models
 from db import engine
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, generate
+from routers import auth, generate, user
 from fastapi.staticfiles import StaticFiles
 import os
 
@@ -24,6 +24,7 @@ app.mount("/images", StaticFiles(directory="files"), name="files")
 
 app.include_router(auth.router)
 app.include_router(generate.router)
+app.include_router(user.router)
 
 @app.get("/")
 async def root():

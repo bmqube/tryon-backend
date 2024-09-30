@@ -12,6 +12,7 @@ from typing import Annotated
 import httpx
 from io import BytesIO
 from typing import Optional
+from fastapi.responses import JSONResponse
 
 directory = "files"
 if not os.path.exists(directory):
@@ -105,13 +106,16 @@ async def fetch_data(
     cloth_image: UploadFile, 
     position: str, 
     mask_image: UploadFile = None, 
-    guidance_scale: int = 2.55, 
+    guidance_scale: float = 2.55, 
     num_inference_steps: int=15,
     seed:int=422
 ) -> UploadFile:
+    
+    print("HEDA 2", num_inference_steps, seed, guidance_scale)
+
     url = "https://galilei.fringecore.sh/tryon"  # Replace with the actual API URL
     try:
-        async with httpx.AsyncClient(follow_redirects=True, timeout=30) as client:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=100) as client:
             files = {
                 'person_image': (person_image.filename, person_image.file, person_image.content_type),
                 'cloth_image': (cloth_image.filename, cloth_image.file, cloth_image.content_type)
@@ -119,7 +123,7 @@ async def fetch_data(
 
             if mask_image is not None:
                 files['mask_image'] = (mask_image.filename, mask_image.file, mask_image.content_type)
-                
+
             data = {
                 'cloth_type': position,
                 'guidance_scale': guidance_scale,
@@ -139,6 +143,7 @@ async def fetch_data(
         print("HEDA")
         raise HTTPException(status_code=exc.response.status_code, detail=str(exc))
     except Exception as exc:
+        print(exc)
         raise HTTPException(status_code=500, detail=str(exc))
 
 @router.post("/")
@@ -146,25 +151,25 @@ async def generateImage(
     person_image: UploadFile, 
     cloth_image: UploadFile, 
     position: Annotated[str, Form()], 
-    response: Response, 
+    response: Response,
     mask_image: UploadFile = None, 
-    guidance_scale: int = 2.55, 
-    num_inference_steps: int=15,
-    seed:int=422, 
+    guidance_scale: Annotated[str, Form()] = "2.35", 
+    num_inference_steps: Annotated[str, Form()] = "10",
+    seed: Annotated[str, Form()] = "130", 
     db: Session = Depends(get_db), 
     current_user: UserSchema = Depends(get_token_header)
 ):
+    # print("HEDA", num_inference_steps, seed, guidance_scale)
     try:
         if current_user.credit < 1:
             response.status_code = 400
             return {
                 'message': "You do not have enough credits to create a session"
             }
-
         person_image_data = await save_image(person_image)
         cloth_image_data = await save_image(cloth_image)
 
-        data = await fetch_data(person_image, cloth_image, position, mask_image, guidance_scale, num_inference_steps, seed)
+        data = await fetch_data(person_image, cloth_image, position, mask_image, float(guidance_scale), int(num_inference_steps), int(seed))
         generated_image_data = await save_image(data)
         
         generated_image = GeneratedImage(
@@ -182,6 +187,15 @@ async def generateImage(
         db.commit()
         db.refresh(generated_image)
         
+    #     return {
+    #         'message': "Image generated successfully",
+    #         'data': generated_image
+    #     }
+    # except Exception as e:
+    #     response.status_code = 400
+    #     return {
+    #         'message': str(e)
+    #     }
         return {
             'message': "Image generated successfully",
             'data': generated_image

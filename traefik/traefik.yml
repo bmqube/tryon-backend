@@ -1,0 +1,25 @@
+entryPoints:
+  http:
+    address: :80
+
+  https:
+    address: :443
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: bmqube1@gmail.com
+      storage: /traefik-storage/acme.json
+      caServer: https://acme-v02.api.letsencrypt.org/directory
+      httpChallenge:
+        entryPoint: http
+providers:
+  file:
+    filename: /traefik/traefik-dynamic.yml
+
+log:
+  format: json
+  level: WARN
+
+metrics:
+  prometheus: {}

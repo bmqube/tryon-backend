@@ -13,5 +13,5 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ssh-key;
           chmod 0400 ssh-key;
 
-      - run: scp -i ssh-key -r -o StrictHostKeyChecking=no ./ ubuntu@103.108.140.108:/root/bostro
-      - run: ssh -i ssh-key -o StrictHostKeyChecking=no ubuntu@103.108.140.108 "cd /root/bostro && docker compose pull && docker compose up --build --remove-orphans -d"
+      - run: scp -i ssh-key -r -o StrictHostKeyChecking=no ./ root@103.108.140.108:/root/bostro
+      - run: ssh -i ssh-key -o StrictHostKeyChecking=no root@103.108.140.108 "cd /root/bostro && docker compose pull && docker compose up --build --remove-orphans -d"

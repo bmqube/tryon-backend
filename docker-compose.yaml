@@ -17,6 +17,8 @@ services:
     environment:
       DB_URL: postgresql://tryon:${POSTGRES_PASSWORD:-dilemma}@postgres:5432/tryon
       JWT_SECRET: ${JWT_SECRET:-secret}
+      FAL_KEY: ${FAL_KEY:-fal-key}
+      BASE_IMAGE_URL: ${BASE_IMAGE_URL:-http://localhost:9827}
     networks:
       - tryon-network
 

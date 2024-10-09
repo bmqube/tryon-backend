@@ -13,6 +13,11 @@ import httpx
 from io import BytesIO
 from typing import Optional
 from fastapi.responses import JSONResponse
+import fal_client
+import requests
+from decouple import config
+
+BASE_IMAGE_URL = config('BASE_IMAGE_URL')
 
 directory = "files"
 if not os.path.exists(directory):
@@ -146,6 +151,44 @@ async def fetch_data(
         print(exc)
         raise HTTPException(status_code=500, detail=str(exc))
 
+async def fetch_data_fal(human_image_url,garment_image_url,cloth_type,num_inference_steps,guidance_scale,seed):
+    try:
+        # Submit the request with the additional parameters
+        handler = await fal_client.submit_async(
+            "fal-ai/cat-vton",
+            arguments={
+                "human_image_url": human_image_url,
+                "garment_image_url": garment_image_url,
+                "cloth_type": cloth_type,
+                "image_size": "portrait_4_3",       # Image size format
+                "num_inference_steps": num_inference_steps,           # Number of inference steps
+                "guidance_scale": guidance_scale,               # Guidance scale for image quality
+                "seed": seed                          # Seed for reproducibility
+            },
+        )
+
+        # Wait for the result
+        result = await handler.get()
+
+        # Get the URL of the generated image
+        image_url = result['image']['url']
+
+        # Download the image and save it locally
+        response = requests.get(image_url)
+        # print(image_url)
+
+        response.raise_for_status()
+
+        file_content = response.content
+        file_name = "generated_image.jpg"
+
+        upload_file = UploadFile(filename=file_name, file=BytesIO(file_content))
+        return upload_file
+    except Exception as e:
+        print("fal.ai")
+        print(e)
+
+
 @router.post("/")
 async def generateImage(
     person_image: UploadFile, 
@@ -169,7 +212,16 @@ async def generateImage(
         person_image_data = await save_image(person_image)
         cloth_image_data = await save_image(cloth_image)
 
-        data = await fetch_data(person_image, cloth_image, position, mask_image, float(guidance_scale), int(num_inference_steps), int(seed))
+        print("cdi", person_image_data)
+
+        person_image_url = BASE_IMAGE_URL + person_image_data['filename']
+        cloth_image_url = BASE_IMAGE_URL + cloth_image_data['filename']
+        
+        print("person_image_url", person_image_url)
+        print("cloth_image_url", cloth_image_url)
+
+        data = await fetch_data_fal(person_image_url, cloth_image_url, position, int(num_inference_steps), float(guidance_scale),  int(seed))
+
         generated_image_data = await save_image(data)
         
         generated_image = GeneratedImage(

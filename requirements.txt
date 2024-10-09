@@ -44,3 +44,4 @@ python-multipart
 python-magic
 pillow
 aiofiles
+fal_client

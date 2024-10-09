@@ -31,9 +31,34 @@ class creditSchema(BaseModel):
     email: str
     credit: int
 
+@router.get("/credit")
+async def getUserCredit(response:Response, db: Session = Depends(get_db), current_user: UserSchema = Depends(get_token_header)):
+    try:
+        user = db.query(User).filter(User.email == current_user.email).first()
+
+        if user is None:
+            response.status_code = 400
+            return {
+                'message': "No user found with this email"
+            }
+        
+        return {
+            'message': "User credit",
+            'data': {
+                'email': user.email,
+                'credit': user.credit
+            }
+        }
+    except Exception as e:
+        response.status_code = 400
+        return {
+            'message': str(e)
+        }
+
 @router.put("/credit")
 async def appendCredit(input: creditSchema, response: Response, db: Session = Depends(get_db), current_user: UserSchema = Depends(get_token_header)):
     try:
+        # print(current_user.email)
         if current_user.role != "admin":
             response.status_code = 400
             return {
